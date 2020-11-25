@@ -1,0 +1,10 @@
+#cloud-config
+debug: true
+disable_root: false
+hostname: ${hostname}
+chpasswd:
+  list: |
+     root:changeme
+  expire: false
+ssh_authorized_keys:
+  - ${authorized_ssh_key}

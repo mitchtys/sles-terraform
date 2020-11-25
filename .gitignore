@@ -1,0 +1,9 @@
+.terraform
+.terraform*
+*.qcow2
+*.tfvars
+*.tfstate
+*.tfstate.backup
+ssh-config-*
+ssh-key-*
+known-hosts-*
