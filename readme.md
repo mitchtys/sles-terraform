@@ -4,6 +4,10 @@
 
 Terraform configuration to setup/run suse images and provide a simple way to test things.
 
+## Intended Audience
+
+For now, people not worried about getting their hands dirty and for things to be incomplete. This is more a POC/MVP for the moment of a world that can be.
+
 ## Current limitations
 
 Right now, this *only* works with terraform libvirt as a provider. Future updates may add more providers but for now kvm/libvirt is the only color car you can get out of this. As such its also restricted to linux only for now.
@@ -12,6 +16,7 @@ Right now, this *only* works with terraform libvirt as a provider. Future update
 
 - Terraform 0.12+ (tested with 0.12.29) https://www.terraform.io/downloads.html
 - Terraform libvirt (tested with 0.6.2)
+- libvirt+kvm installed
 - Gnu make (optional)
 - a posix shell and time
 
@@ -27,7 +32,7 @@ Pretty easy, just run:
 make
 ```
 
-You may optionally just run `terraform apply`/etc... directly instead of using `make`
+You may optionally just run `terraform apply`/etc... directly instead of using `make`. The makefile setup is to be lazy as typing make up/down is shorter than typing the terraform commands. Yes you can alias things, I'm just used to having make do all the work.
 
 This will get you a single vm instance of a sles 15 sp2 vm to abuse at your leisure.
 
@@ -59,6 +64,17 @@ Example:
 rsync -avz -e 'ssh -F ./ssh-config-default' root@largely-active-squid:/etc/hosts /dev/null
 ```
 
+## Structure of providers/modules
+
+To give a more complete breakdown of the intent. The goal is for this terraform setup to behave as follows:
+
+- Provider(s) should be selectable, we will only have one provider active at a time (this could be changed later, though not sure of the utility of doing so)
+- The providers setup vm's such that the modules only need to worry about ssh'ing in a remote-exec can happen.
+- The providers call specific modules, say k3s like a function call with: here are your host->ip mappings, as well as ssh keys, and anything else you'll need.
+- The modules that implement things then go off and do their thing being blissfully ignorant of the provider they're running on.
+
+Note: This isn't intended to be a secure production setup, storing the ssh/host keys in the terraform layout is not a good production practice. It is done here for the sake of expediency and simplicity. These environments are setup to be expendable and temporary. Productionizing anything based off this environment is left as an exercise to the reader.
+
 ## FAQ
 
 ### The hostnames suck I want to change them to something meaningful
@@ -89,11 +105,12 @@ But adding things like making N vm's have M cpus and Y amounts of ram is somethi
 
 ## Todos
 
+- TODO Finish module setup for k3s/rke
+- TODO Opensuse support? Non sles support?
 - TODO Add modules for ses7/caasp and wire that up into this basic setup.
 - TODO Setup an OBS multibuild to build images internally so one need not build themselves
 - TODO Update kiwi builds to allow for customizing the install or adding new packages
 - TODO Also make it so that I can use make to autgenerate config.xml files for sles15/sles15sp2 etc...
-- TODO Update kiwi terraform setup to optionally re-use an existing build-root via a var or something, should save a bit of time on rebuilds.
 - Many more...
 
 ## License

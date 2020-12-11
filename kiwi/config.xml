@@ -14,9 +14,9 @@
     <hwclock>utc</hwclock>
     <rpm-excludedocs>true</rpm-excludedocs>
     <type image="oem" devicepersistency="by-uuid" installiso="false" filesystem="ext4" initrd_system="dracut" firmware="uefi" bootloader="grub2" kernelcmdline="plymouth.enable=0 console=ttyS0,115200n8 console=tty0 net.ifnames=0 rd.shell rd.debug log_buf_len=1M rd.kiwi.debug" format="qcow2">
+      <size unit="G">20</size>
       <oemconfig>
-        <oem-systemsize>2048</oem-systemsize>
-        <oem-swap>true</oem-swap>
+        <oem-systemsize>20480</oem-systemsize>
         <oem-device-filter>/dev/ram</oem-device-filter>
         <oem-multipath-scan>false</oem-multipath-scan>
       </oemconfig>
@@ -106,6 +106,8 @@
     <package name="acl"/>
     <package name="curl"/>
     <package name="cloud-init"/>
+    <package name="jq"/>
+    <package name="which"/>
     <package name="wget"/>
     <package name="group(mail)"/>
     <package name="group(wheel)"/>
@@ -127,7 +129,7 @@
     <package name="iproute2"/>
     <package name="openssh"/>
     <package name="rsync"/>
-    <package name="kernel-default-base" />
+    <package name="kernel-default"/>
     <package name="sudo"/>
   </packages>
   <packages type="bootstrap">

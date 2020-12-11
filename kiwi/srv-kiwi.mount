@@ -1,0 +1,11 @@
+[Unit]
+Description=/srv/kiwi mount
+
+[Mount]
+What=/dev/vdb
+Where=/srv/kiwi
+Type=ext3
+Options=defaults
+
+[Install]
+WantedBy=multi-user.target

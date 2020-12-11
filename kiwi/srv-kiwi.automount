@@ -1,0 +1,7 @@
+Description=Automount /srv/kiwi on demand
+
+[Automount]
+Where=/srv/kiwi
+
+[Install]
+WantedBy=multi-user.target

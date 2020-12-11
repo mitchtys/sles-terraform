@@ -24,5 +24,5 @@ clean:
 
 .PHONY: kiwi
 kiwi:
-	$(TERRAFORM) taint 'null_resource.kiwi_run'
+	-$(TERRAFORM) taint 'null_resource.kiwi_run'
 	$(MAKE) up

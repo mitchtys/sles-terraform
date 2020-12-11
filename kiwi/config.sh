@@ -35,8 +35,6 @@ EOF
 
 chkconfig sshd on
 
-baseStripRPM
-
 baseUpdateSysConfig /etc/sysconfig/network/dhcp DHCLIENT_SET_HOSTNAME yes
 
 sed -i 's/.*rpm.install.excludedocs.*/rpm.install.excludedocs = yes/g' /etc/zypp/zypp.conf
@@ -55,7 +53,5 @@ done
 suseConfig
 
 /sbin/ldconfig
-
-baseCleanMount
 
 exit 0
