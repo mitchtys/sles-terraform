@@ -97,7 +97,7 @@ rke_post() {
 k3s_pre() {
   common_pre
   if [ "${index}" = "0" ]; then
-    curl -sfL https://get.k3s.io | sh -s - --disable=traefik
+    curl -sfL https://get.k3s.io | sh -s -
   fi
   wait
 }
@@ -115,7 +115,7 @@ k3s_install() {
 k3s_post() {
   common_post
   if [ -e "${k3s}" ]; then
-    echo "export KUBECONFIG=${k3s}" | tee /etc/profile.d/k3.sh
+    echo "export KUBECONFIG=${k3s}" | tee /etc/profile.d/k3s.sh
   fi
 }
 
