@@ -2,7 +2,7 @@ nodes:
 %{ for host, idx in hosts }- address: ${host}
   port: "22"
   internal_address: ""
-  role:%{ if idx == 0 }
+  role:%{ if idx == 0 || count < 2 }
   - controlplane
   - etcd%{ else }
   - worker%{ endif }

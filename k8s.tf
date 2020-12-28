@@ -12,14 +12,14 @@ resource "local_file" "rke_cluster" {
   file_permission = "0644"
   filename        = "${abspath(path.root)}/rke-cluster-${terraform.workspace}"
   content = templatefile("${path.root}/rke-cluster.template", {
-        hosts = local.host_id
+        hosts = local.host_id,
+        count = local.count
     })
 }
 
 resource "null_resource" "k8s_files" {
   count      = local.count
   depends_on = [
-    local_file.rke_cluster,
     libvirt_domain.node,
     tls_private_key.ssh_key,
     local_file.ssh_private_key,
@@ -42,6 +42,7 @@ resource "null_resource" "k8s_files" {
 resource "null_resource" "k8s_rke_clusteryaml" {
   count = var.with_k8s == "rke" ? 1 : 0
   depends_on = [
+    local_file.rke_cluster,
     libvirt_domain.node,
     tls_private_key.ssh_key,
     local_file.ssh_private_key,
