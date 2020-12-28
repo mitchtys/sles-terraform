@@ -4,7 +4,7 @@ nodes:
   internal_address: ""
   role:%{ if idx == 0 || count < 2 }
   - controlplane
-  - etcd%{ else }
+  - etcd%{ endif }%{ if idx != 0 || count < 2 }
   - worker%{ endif }
   hostname_override: ""
   user: root
