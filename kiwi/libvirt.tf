@@ -1,3 +1,9 @@
+variable with_kiwi_run {
+  description = "controls if the kiwi script gets run or not, generally not useful unless you're debugging and want to run kiwi manually"
+  type        = bool
+  default     = true
+}
+
 variable allow_existing_root {
   description = "whether kiwi-ng should have --allow-existing-root to reuse an already built root for images"
   type        = bool
@@ -338,7 +344,7 @@ resource "local_file" "known_hosts" {
 }
 
 resource "null_resource" "kiwi_run" {
-  count      = local.count
+  count      = var.with_kiwi_run ? local.count : 0
   depends_on = [ libvirt_domain.node, tls_private_key.ssh_key ]
   connection {
     host        = libvirt_domain.node[count.index].network_interface[0].addresses[0]

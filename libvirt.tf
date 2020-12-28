@@ -1,26 +1,12 @@
-variable qcow_source {
-  description = "source qcow2 image used for boot vm's"
-  type        = string
-  default     = "./kiwi/out/sle15.x86_64-15.2.qcow2"
-}
-
 variable node_count {
   description = "count of vm's to build"
   type        = number
   default     = 1
 }
 
-# No pets! I'm assuming /tmp gets nuked on each boot
-variable base_dir {
-  description = "directory path to use for libvirt pools"
-  type        = string
-  default     = "/tmp"
-}
-
 output "variables" {
   value = {
     "node_count"  = var.node_count
-    "qcow_source" = var.qcow_source
     "base_dir"    = var.base_dir
   }
 }
@@ -217,9 +203,16 @@ locals {
     for x in libvirt_domain.node:
       x.name => x.network_interface[0].addresses[0]
   }
+  # Hard coded to 1 master for now
+  master_hosts = length(local.hosts) > 0 ? zipmap(slice(keys(local.hosts), 0, 1), slice(values(local.hosts), 0, 1)) : {}
+  worker_hosts = length(local.hosts) > 0 ? zipmap(slice(keys(local.hosts), 1, length(local.hosts)), slice(values(local.hosts), 1, length(local.hosts))) : {}
   host_keys = {
     for i in range(0, local.count):
       random_pet.node_petname[i].id => tls_private_key.host_key_rsa[i].public_key_openssh
+  }
+  host_id = {
+    for i in range(0, local.count):
+      libvirt_domain.node[i].name => i
   }
 }
 
@@ -229,6 +222,14 @@ output "hosts" {
 
 output "host_keys" {
   value = local.host_keys
+}
+
+output "host_id" {
+  value = local.host_id
+}
+
+output "first" {
+  value = libvirt_domain.node[0].network_interface[0].hostname
 }
 
 resource "local_file" "ssh_config" {

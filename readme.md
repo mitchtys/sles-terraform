@@ -4,13 +4,30 @@
 
 Terraform configuration to setup/run suse images and provide a simple way to test things.
 
-## Intended Audience
+## Intended Audience and/or Reason to Exist
 
 For now, people not worried about getting their hands dirty and for things to be incomplete. This is more a POC/MVP for the moment of a world that can be.
+
+The current layout was intended to provide/allow for the following use cases or itches I needed to scratch:
+- Have a way to build sles qcow2 images locally, e.g. outside of obs
+- Be able to boot those images via libvirt/kvm
+- Be able to build N nodes via those images to "do things"
+- Be able to layer on higher level "things" on top of the created vms
+- Work with terraform workspaces and at a minimum libvirt provider requirements
+- Bridging the vm's to the same network as the hosting system wasn't a huge priority
+- Firewalled systems aren't considered at all, so you're on your own if you have super restrictive firewall rulesets
 
 ## Current limitations
 
 Right now, this *only* works with terraform libvirt as a provider. Future updates may add more providers but for now kvm/libvirt is the only color car you can get out of this. As such its also restricted to linux only for now.
+
+Outside of what is in the TODO section at the end current constraints that resulted in this mish-mash of setup scripts/terraform are:
+- The libvirt provider requires unique domain names, one cannot reuse names
+- Due to that, and the conflicting use of terraform workspaces, domain names are randomized using the rand_pet module to prevent collisions in workspaces
+- Terraform 0.13 and the terraform-provider-libvirt seem to be at odds to each other, as such terraform 0.12 is the only validated version, I'm working on validating this, but for now you're on your own if you use 0.13
+- Due to terraform 0.12 having a huge gulf between "whats defined in .tf files, and what results from the .tf files at runtime", the k8s and other modules are just simply top level .tf files for now and mostly all hard coded for libvirt
+- Node size is the same for everything right now. Making it dynamic is not a huge priority but probably should be done, as long as it can be done simply
+- Extra disk allocation/devices is also not handled, but for something like (OpenEBS)[https://openebs.io/] some way to add disks to certain vm's should be figured out
 
 ## Prerequisites
 
@@ -22,7 +39,13 @@ Right now, this *only* works with terraform libvirt as a provider. Future update
 
 ## How can I create images to boot?
 
-Look at the readme in the [kiwi](./kiwi/readme.md) directory.
+Look at the readme in the [kiwi](./kiwi/readme.md) directory. But in a nutshell you *MUST* at a minimum run:
+
+```
+make -C kiwi
+```
+
+Prior to booting any vm's. The *all* makefile target will attempt to do this but you need a qcow2 image to boot from before you run. Note that the *up* make target does not check for qcow2 presence, if you run *make up* or *terraform apply* without a qcow2 image, you're gonna have a bad time.
 
 ## Booting the images
 
@@ -35,6 +58,26 @@ make
 You may optionally just run `terraform apply`/etc... directly instead of using `make`. The makefile setup is to be lazy as typing make up/down is shorter than typing the terraform commands. Yes you can alias things, I'm just used to having make do all the work.
 
 This will get you a single vm instance of a sles 15 sp2 vm to abuse at your leisure.
+
+## Booting the images with optional stuff, aka with_* variables
+
+Lets say you want a k3s cluster that is 5 nodes in size. No problem!
+
+```
+echo node_count=5 > k3s.tfvars
+echo 'with_k8s="k3s"' >> k3s.tfvars
+make up TFOPTS='-var-file="k3s.tfvars"'
+```
+
+Or maybe you want a 3 node rke cluster instead:
+
+```
+echo node_count=3 > rke.tfvars
+echo 'with_k8s="rke"' >> rke.tfvars
+make up TFOPTS='-var-file="rke.tfvars"'
+```
+
+And in a few minutes you'll have a 3 node rke cluster. Though a fully barebones one.
 
 ## How the hell do I ssh to the vm's?
 
@@ -63,17 +106,6 @@ Example:
 ```
 rsync -avz -e 'ssh -F ./ssh-config-default' root@largely-active-squid:/etc/hosts /dev/null
 ```
-
-## Structure of providers/modules
-
-To give a more complete breakdown of the intent. The goal is for this terraform setup to behave as follows:
-
-- Provider(s) should be selectable, we will only have one provider active at a time (this could be changed later, though not sure of the utility of doing so)
-- The providers setup vm's such that the modules only need to worry about ssh'ing in a remote-exec can happen.
-- The providers call specific modules, say k3s like a function call with: here are your host->ip mappings, as well as ssh keys, and anything else you'll need.
-- The modules that implement things then go off and do their thing being blissfully ignorant of the provider they're running on.
-
-Note: This isn't intended to be a secure production setup, storing the ssh/host keys in the terraform layout is not a good production practice. It is done here for the sake of expediency and simplicity. These environments are setup to be expendable and temporary. Productionizing anything based off this environment is left as an exercise to the reader.
 
 ## FAQ
 
@@ -105,9 +137,7 @@ But adding things like making N vm's have M cpus and Y amounts of ram is somethi
 
 ## Todos
 
-- TODO Finish module setup for k3s/rke
 - TODO Opensuse support? Non sles support?
-- TODO Add modules for ses7/caasp and wire that up into this basic setup.
 - TODO Setup an OBS multibuild to build images internally so one need not build themselves
 - TODO Update kiwi builds to allow for customizing the install or adding new packages
 - TODO Also make it so that I can use make to autgenerate config.xml files for sles15/sles15sp2 etc...
