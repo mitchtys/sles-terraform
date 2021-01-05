@@ -11,7 +11,7 @@ let
   ]);
 in
 mkShell {
-  buildInputs = [ asciinema jq t tflint ];
+  buildInputs = [ asciinema jq t tflint packer qemu_kvm xmlstarlet ];
   shellHook = ''
     if [ ! -d .terraform ] || [ libvirt.tf -nt .terraform ]; then
       echo terraform init
