@@ -28,11 +28,6 @@ output "random_integer" {
   }
 }
 
-# instantiate the provider
-provider "libvirt" {
-  uri = "qemu:///system"
-}
-
 resource "libvirt_volume" "sles" {
   name   = local.instance
   source = abspath("${path.root}/${var.qcow_source}")

@@ -36,6 +36,18 @@ Outside of what is in the TODO section at the end current constraints that resul
 - libvirt+kvm installed
 - Gnu make (optional)
 - a posix shell and time
+- terraform-provider-libvirt
+- terraform-provider-shell
+
+For the last two providers, you will need to make sure these both are installed
+and functional, both providers are needed for this setup to work:
+- https://registry.terraform.io/providers/scottwinkler/shell/latest
+- https://github.com/dmacvicar/terraform-provider-libvirt#installing
+
+As of terraform 0.12 terraform init won't download third party providers.
+
+If you happen to use the nix package manager, you can simply run `nix-shell` to
+get an environment with everything needed installed.
 
 ## How can I create images to boot?
 

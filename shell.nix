@@ -13,7 +13,7 @@ in
 mkShell {
   buildInputs = [ asciinema jq t tflint ];
   shellHook = ''
-    if [ ! -d .terraform ] || [ libvirt.tf -nt .terraform ]; then
+    if [ ! -d .terraform ] || [ providers.tf -nt .terraform ]; then
       echo terraform init
       terraform init -input=false -get-plugins=false -upgrade > /dev/null 2>&1
       touch .terraform

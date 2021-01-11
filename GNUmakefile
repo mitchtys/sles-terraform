@@ -9,7 +9,7 @@ all: $(QCOW2) up
 .PHONY: redo
 redo: down up
 
-.terraform:
+.terraform: providers.tf
 	$(TERRAFORM) init
 
 # Build the default qcow if its missing.
@@ -21,7 +21,7 @@ up: .terraform
 	$(TERRAFORM) apply $(TFOPTS) -auto-approve
 
 .PHONY: down
-down:
+down: .terraform
 	$(TERRAFORM) destroy $(TFOPTS) -auto-approve
 
 .PHONY: clean

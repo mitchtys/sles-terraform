@@ -62,11 +62,6 @@ output "random_integer" {
   }
 }
 
-# instantiate the provider
-provider "libvirt" {
-  uri = "qemu:///system"
-}
-
 resource "libvirt_volume" "kiwi" {
   count      = local.count
   # TODO: How do I do something like trigger in null_resource to rebuild the

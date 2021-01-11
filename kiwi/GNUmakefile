@@ -7,7 +7,7 @@ all: up
 .PHONY: redo
 redo: down up
 
-.terraform:
+.terraform: providers.tf
 	$(TERRAFORM) init
 
 .PHONY: up
@@ -15,7 +15,7 @@ up: .terraform
 	$(TERRAFORM) apply -auto-approve
 
 .PHONY: down
-down:
+down: .terraform
 	$(TERRAFORM) destroy -auto-approve
 
 .PHONY: clean
