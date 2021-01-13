@@ -8,3 +8,5 @@ ssh-config-*
 ssh-key-*
 known-hosts-*
 rke-cluster-*
+Cargo.lock
+/target

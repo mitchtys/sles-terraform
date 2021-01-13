@@ -1,0 +1,17 @@
+[package]
+name = "stc"
+version = "0.1.0"
+authors = ["Mitchell Tishmack <mitchell.tishmack@suse.com>"]
+edition = "2018"
+
+[lib]
+name = "stc"
+path = "src/lib.rs"
+
+[[bin]]
+name = "stc"
+path = "src/stc.rs"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
