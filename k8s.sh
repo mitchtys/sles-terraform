@@ -97,7 +97,7 @@ rke_post() {
 k3s_pre() {
   common_pre
   if [ "${index}" = "0" ]; then
-    curl -sfL https://get.k3s.io | sh -s -
+    curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION=v1.19.5+k3s2 sh -s -
   fi
   wait
 }
@@ -107,7 +107,7 @@ k3s_install() {
   if [ "${index}" != "0" ]; then
     if ! command -v k3s; then
       token=$(ssh ${firstnode} "cat /var/lib/rancher/k3s/server/node-token")
-      curl -sfL https://get.k3s.io | K3S_URL=https://${firstnode}:6443 K3S_TOKEN=$token sh -
+      curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION=v1.19.5+k3s2 K3S_URL=https://${firstnode}:6443 K3S_TOKEN=$token sh -
     fi
   fi
 }
