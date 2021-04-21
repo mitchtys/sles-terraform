@@ -188,6 +188,42 @@ resource "libvirt_domain" "node" {
     until systemctl is-active --quiet sshd.service; do
       sleep 1
     done
+    echo vm.overcommit_memory=1 | tee -a /etc/sysctl.conf
+    echo kernel.panic=10 | tee -a /etc/sysctl.conf
+    echo kernel.panic_on_oops=1 | tee -a /etc/sysctl.conf
+    useradd etcd
+    FIN
+    ]
+  }
+
+  # The stupid effing /etc/machine-id thing means journald won't work until
+  # after a reboot, hate systemd so much
+  provisioner "remote-exec" {
+    on_failure = continue
+    inline = [<<-FIN
+set -xe
+echo "tmpfs   /tmp         tmpfs   rw,nodev,nosuid,size=2G          0  0" | tee -a /etc/fstab
+mount -a
+touch /tmp/.i-am-not-rebooted /etc/machine-id
+systemctl reboot
+FIN
+    ]
+  }
+
+  provisioner "local-exec" {
+    command = "sleep 10"
+  }
+
+  provisioner "remote-exec" {
+    inline = [<<-FIN
+set -xe
+while true; do
+  if [ -e /tmp/.i-am-not-rebooted ]; then
+    sleep 5
+  else
+    break
+  fi
+done
     FIN
     ]
   }
@@ -209,6 +245,10 @@ locals {
     for i in range(0, local.count):
       libvirt_domain.node[i].name => i
   }
+  id_host = {
+    for i in range(0, local.count):
+      i => libvirt_domain.node[i].name
+  }
 }
 
 output "hosts" {
@@ -221,6 +261,10 @@ output "host_keys" {
 
 output "host_id" {
   value = local.host_id
+}
+
+output "id_host" {
+  value = local.id_host
 }
 
 output "first" {
@@ -299,7 +343,7 @@ resource "null_resource" "ssh_setup_root" {
 
 # And do it for sles too
 # TODO: maybe build a module to encompass this ssh setup for multiple users
-resource "null_resource" "ssh_setup_sles" {
+resource "null_resource" "ssh_setup_user" {
   count      = local.count
   depends_on = [
     libvirt_domain.node,

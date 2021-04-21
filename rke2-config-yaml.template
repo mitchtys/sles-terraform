@@ -1,0 +1,6 @@
+%{ if length(tls_san) > 0 }tls-san:
+%{ for x in tls_san }  - ${x}
+%{ endfor }%{ else }server: https://${server}:9345
+%{ endif }
+token: ${token}
+#protect-kernel-defaults: true
