@@ -161,6 +161,98 @@ done
   }
 }
 
+# All following/subsequent servers get added via this resource
+resource "null_resource" "rke2_agents" {
+  count = (var.with_rke2 && ((local.count - var.rke2_servers) > 0)) ? (local.count - var.rke2_servers) : 0
+  depends_on = [
+    libvirt_domain.node,
+    tls_private_key.ssh_key,
+    local_file.ssh_private_key,
+    local_file.ssh_public_key,
+    null_resource.ssh_setup_root,
+    null_resource.ssh_setup_user,
+    null_resource.rke2_prime
+  ]
+
+  connection {
+    host        = libvirt_domain.node[(count.index+var.rke2_servers)].network_interface[0].addresses[0]
+    private_key = tls_private_key.ssh_key.private_key_pem
+    type        = "ssh"
+    user        = "root"
+  }
+
+  provisioner "file" {
+    content     = templatefile("${path.root}/rke2-config-yaml.template", {
+        server   = libvirt_domain.node[0].network_interface[0].addresses[0],
+        schedule = var.rke2_schedule,
+        token    = var.rke2_token,
+        tls_san  = []
+        }
+      )
+    destination = "/root/config.yaml"
+  }
+
+  provisioner "remote-exec" {
+    inline = [<<-FIN
+set -xe
+install -dm755 /etc/rancher/rke2
+install -m640 /root/config.yaml /etc/rancher/rke2
+
+curl -sfL https://get.rke2.io -o /root/rke2-install.sh
+chmod 755 /root/rke2-install.sh
+
+if [ ${var.rke2_version} = "changeme" ]; then
+  /root/rke2-install.sh
+else
+  env INSTALL_RKE2_VERSION=${var.rke2_version} /root/rke2-install.sh
+fi
+
+systemctl start --now rke2-agent
+FIN
+    ]
+  }
+}
+
+# HERE BE HACKS
+variable "short_dns_ttl" {
+  type        = bool
+  default     = true
+  description = "Whether to set short dns ttl's or not."
+}
+
+locals {
+  dns_ttl = var.short_dns_ttl ? 120 : 43200
+}
+
+variable "hack_cloudflare_dns_zoneid" {
+  type        = string
+  description = "zoneid for rancher"
+  default     = "changeme"
+}
+
+variable "cloudflare_api_token" {
+  type        = string
+  description = "cloudflare api token used to login to cloudflare account"
+  default     = "changeme"
+}
+
+provider "cloudflare" {
+  version   = "~> 2.0"
+  api_token = var.cloudflare_api_token
+}
+
+resource "cloudflare_record" "rancher_hack" {
+  zone_id    = var.hack_cloudflare_dns_zoneid
+  name       = "rancher"
+  value      = libvirt_domain.node[0].network_interface[0].addresses[0]
+  type       = "A"
+  ttl        = local.dns_ttl
+}
+
+locals {
+  rancher_hostname = "rancher.functionalidiot.com"
+}
+
 # hack to "do stuff" after the install
 resource "null_resource" "rke2_hack" {
   count = var.with_rke2 ? 1 : 0
@@ -171,7 +263,8 @@ resource "null_resource" "rke2_hack" {
     local_file.ssh_public_key,
     null_resource.ssh_setup_root,
     null_resource.ssh_setup_user,
-    null_resource.rke2_prime
+    null_resource.rke2_prime,
+    cloudflare_record.rancher_hack
   ]
 
   connection {

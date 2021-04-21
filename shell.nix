@@ -8,6 +8,7 @@ let
     p.shell
     p.template
     p.tls
+    p.cloudflare
   ]);
 in
 mkShell {
