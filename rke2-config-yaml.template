@@ -3,9 +3,9 @@
 %{ endfor }%{ else }server: https://${server}:9345
 %{ endif }
 token: ${token}
-# %{ if schedule }%{ else }node-taint:
-#   - "CriticalAddonsOnly=true:NoExecute"
-# %{ endif }
+%{ if schedule }%{ else }node-taint:
+  - "CriticalAddonsOnly=true:NoExecute"
+%{ endif }
 protect-kernel-defaults: true
-profile: cis-1.6
+#profile: cis-1.6
 # selinux: true

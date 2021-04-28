@@ -59,6 +59,8 @@ zypper ar --no-check --no-gpgcheck --no-refresh http://download.suse.de/ibs/Deve
 zypper ar --no-check --no-gpgcheck --no-refresh http://download.suse.de/ibs/Devel:/CaaSP:/4.5/SLE_15_SP2/Devel:CaaSP:4.5.repo
 zypper ar --no-check --no-gpgcheck --no-refresh http://download.suse.de/ibs/SUSE:/SLE-15-SP2:/Update:/Products:/SES7/standard/SUSE:SLE-15-SP2:Update:Products:SES7.repo
 
+zypper ar --no-check --no-gpgcheck --no-refresh http://download.suse.de/ibs/Devel:/Docker/SUSE_SLE-15_GA_standard/Devel:Docker.repo
+
 # http://download.suse.de/ibs/Devel:/PubCloud/SLE_15_SP2/Devel:PubCloud.repo
 # http://download.suse.de/ibs/Devel:/CaaSP:/4.5/SLE_15_SP2/Devel:CaaSP:4.5.repo
 # http://download.suse.de/ibs/SUSE:/SLE-15-SP2:/Update:/Products:/SES7/standard/SUSE:SLE-15-SP2:Update:Products:SES7.repo
